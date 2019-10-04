@@ -20,87 +20,93 @@ class Matrix(object):
             for i in range(self.cols):
                 self.data[r][i] = random.random()
 
-    def fromArray(self, arr):
-        m = Matrix(len(arr),1)
-        for i,val in enumerate(arr):
-            m.data[i][0] = val
-        return m
 
-    def add(self,other):
-        """Add a matrix to self"""
-        for i in range(self.rows):
-            for j in range(self.cols):
-                self.data[i][j] += other.data[i][j]
+def fromArray(arr):
+    m = Matrix(len(arr),1)
+    for i,val in enumerate(arr):
+        m.data[i][0] = val
+    return m
 
-    def transpose(self):
-        '''Transposes matrix'''
+def add(A,B):
+    """Add A matrix to B"""
+    output = []
+    for i in range(len(A)):
+        output.append([])
+        for j in range(len(A[0])):
+            output[i].append(A[i][j] + B[i][j])
+    return output
 
-        output = []
-        m = self.rows
-        n = self.cols
-        # create an n x m matrix
-        for i in range(n):
-            output.append([])
-        for j in range(m):
-        # replace a[i][j] with a[j][i]
-            output[i].append(self.data[j][i])
-        return output
+def transpose(A):
+    '''Transposes matrix'''
+
+    output = []
+    m = len(A)
+    n = len(A[0])
+    # create an n x m matrix
+    for i in range(n):
+        output.append([])
+    for j in range(m):
+    # replace a[i][j] with a[j][i]
+        output[i].append(A[j][i])
+    return output
 
 
-    def multiply(self,b):
-        '''Returns the product of
-        matrix a and matrix b'''
+def multiply(A,B):
+    '''Returns the product of
+    matrix a and matrix b'''
 
-        newmatrix = []
-        for i in range(self.rows):
-            row = []
-            #for every column in b
-            for j in range(b.cols):
-                sum1 = 0
-                #for every element in the column
-                for k in range(b.rows):
-                    sum1 += self.data[i][k]*b.data[k][j]
-                row.append(sum1)
-            newmatrix.append(row)
-        self.data = newmatrix
+    newmatrix = []
+    for i in range(len(A)):
+        row = []
+        #for every column in b
+        for j in range(B[0]):
+            sum1 = 0
+            #for every element in the column
+            for k in range(B):
+                sum1 += A[i][k]*B[k][j]
+            row.append(sum1)
+        newmatrix.append(row)
+    return newmatrix
 
-    def multiply_scalar(self,b):
-        """Returns self's data multiplied by
-        a number b."""
-        newmatrix = []
-        for i in range(self.rows):
-            row = [b * self.data[i][j] for j in range(self.cols)]
-            newmatrix.append(row)
+def multiply_scalar(self,b):
+    """Returns self's data multiplied by
+    a number b."""
+    newmatrix = []
+    for i in range(self.rows):
+        row = [b * self.data[i][j] for j in range(self.cols)]
+        newmatrix.append(row)
 
-        self.data = newmatrix
+    self.data = newmatrix
 
-    def map(self,func):
-        """Returns self's data with a function applied."""
-        newmatrix = []
-        for i in range(self.rows):
-            row = []
-            for j in range(self.cols):
-                row.append(func(self.data[i][j]))
-            newmatrix.append(row)
+def map(A,func):
+    """Returns self's data with a function applied."""
+    newmatrix = []
+    for i in range(A):
+        row = []
+        for j in range(len(A[0])):
+            row.append(func(A[i][j]))
+        newmatrix.append(row)
 
-        self.data = newmatrix
+    return newmatrix
 
-    def print_matrix(self):
-        for row in self.data:
-            print(row)
+def print_matrix(A):
+    for row in A:
+        print(row)
 
 
 def g(x):
     return 2*x + 5
-m2 = Matrix(2,2)
-m3 = Matrix(2,2)
-#m2.randomize()
-m2 = 5
-m3.randomize()
-#print(type(m2))
-#m2.data = [[1,2],[3,4]]
-m3.data = [[5,6],[-2,-1]]
-#print(m2.data)
-#print(m3.data)
-m3.map(g)
-m3.print_matrix()
+
+if __name__ == '__main__':
+    m2 = Matrix(2,2)
+    m3 = Matrix(2,2)
+    #m2.randomize()
+    m2 = 5
+    m3.randomize()
+    #print(type(m2))
+    #m2.data = [[1,2],[3,4]]
+    m3.data = [[5,6],[-2,-1]]
+    #print(m2.data)
+    #print(m3.data)
+    m3.map(g)
+    m3.print_matrix()
