@@ -3,10 +3,13 @@
 import random
 from bird import Bird
 
-def nextGeneration(n,s,birds):
-    calculateFitness(s)
+def nextGeneration(n,savedBirds,birds,bestBirds):
+    savedBirds.extend(bestBirds)
+    calculateFitness(savedBirds)
+    savedBirds.sort(key=Bird.get_score, reverse=True)
+    print(savedBirds[0].brain.who)
     for i in range(n):
-        birds.append(pickOne(s))
+        birds.append(pickOne(savedBirds))
 
 def pickOne(savedBirds,rate=0.3):
     index = 0
@@ -17,6 +20,7 @@ def pickOne(savedBirds,rate=0.3):
 
     index -= 1
     bird = savedBirds[index]
+    rate *= 150*bird.score
     child = Bird(bird.brain)
     child.brain.mutate(rate)
     return child

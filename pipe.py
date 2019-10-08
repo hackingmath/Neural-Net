@@ -19,6 +19,7 @@ class Pipe(object):
         self.w = 80 #width of pipe
         self.speed = 4
 
+
     def hits(self,bird):
         if bird.y < self.top or bird.y + bird.w > height - self.bottom:
             if  self.x < bird.x < (self.x + self.w):

@@ -44,18 +44,18 @@ class NeuralNetwork(object):
 
     def copy(self):
         output = NeuralNetwork(self.inodes,self.hnodes,self.onodes,self.lr)
-        output.wih = self.wih
-        output.who = self.who
+        output.wih = self.wih.copy()
+        output.who = self.who.copy()
         output.lr = self.lr
         return output
 
     def mutate(self,rate = 0.3):
         if random.random() < rate:
-            val = np.random.normal(0,0.1)
+            val = 1.0 + np.random.normal(0,0.01)
         else:
-            val = 1
-        self.wih*=val
-        self.who*=val
+            val = 1.0
+        self.wih *= val
+        self.who *= val
         return self
 
 
@@ -182,5 +182,10 @@ def main():
     #print(n.query([1.0, 0.5, -1.5]))
 
 if __name__ == "__main__":
-    main()
+    #main()
+    n = NeuralNetwork(2, 4, 2, 0.3)
+    print(n.wih)
+    m = n.copy()
+    print(n.wih)
+    print(m.wih)
 
