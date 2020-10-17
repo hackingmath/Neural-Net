@@ -66,3 +66,4 @@ class Ship():
                     break
 
     def think(self):
+        pass
