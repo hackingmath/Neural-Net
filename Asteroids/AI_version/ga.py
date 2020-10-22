@@ -1,0 +1,107 @@
+# adapting flappy bird GA for Asteroids
+# October 20, 2020
+import random
+from ship_ai import Ship
+
+def nextGeneration():
+    global NUM_SHIPS,savedships,ships,bestships
+    #savedships.extend(bestships) #<><><><><><>#.#<><><><><><>#.#<><><><><><>#
+    calculateFitness()
+    savedships.sort(key=Ship.get_score, reverse=True) #<><><><><><>#.#<><><><><><>#.#<><><><><><>#
+    for i in range(NUM_SHIPS): #<><><><><><>#.#<><><><><><>#.#<><><><><><>#
+        new_ship = pickOne(savedships)
+        if random.random() < 0.5 and i > 0: # cross breed - not sure this works!
+            new_ship.brain.wih = (new_ship.brain.wih + ships[-1].brain.wih) * 0.75
+            new_ship.brain.who = (new_ship.brain.who + ships[-1].brain.who) * 0.25
+        ships.append(new_ship)
+    for i in range(5):
+        ships.append(Ship()) # add 50 fresh blood
+
+def pickOne(savedships, rate=0.3):
+    index = 0
+    r = random.random() * 0.5 # only select from first half of savedships
+    while r > 0:
+        try:
+            r = r - savedships[index].fitness
+        except IndexError:
+            break#print("index",index)
+        index += 1
+
+    index -= 1
+    ship = savedships[index]
+    child = Ship(brain=ship.brain)
+    amount = 0.2 if index > 50 else 0.002 * index #<><><><><><>#.#<><><><><><>#.#<><><><><><>#
+    child.brain.mutate(rate, amount)
+    return child
+
+def calculateFitness():
+    global savedships
+    _sum = 0
+    for ship in savedships:
+        _sum += ship.score
+
+    for ship in savedships:
+        try:
+            ship.fitness /= _sum
+        except:
+            pass
+    return _sum
+
+NUM_SHIPS = 5
+GENERATIONS = 3
+
+ships = []
+savedships = [Ship() for i in range(NUM_SHIPS)]
+bestships = []
+bestship = None
+generation = 0
+counter = 0
+bestScore = 0
+highScore = 0
+
+for i in range(GENERATIONS):
+    nextGeneration()
+    generation += 1
+    #if generation % 50 == 0:
+    print("Generation:", generation)
+
+    for n,ship in enumerate(ships):
+        #ship.think(bullets)
+        score = ship.play()
+        print("Ship",n,"done.")
+        if score > bestScore:
+            bestScore = score
+            bestship = ship
+            bestships.append(ship)
+            bestships.sort(key=Ship.get_score, reverse=True)
+            bestships = bestships[:10]  # only keep best 10 (PG)
+            savedships.append(ship)
+        print("score:",ship.score)
+        print("Best score:",bestScore)
+        print("best ships:",len(bestships))
+        print("savedships:",len(savedships))
+        savedships= savedships[:100]
+
+    print("Best Score:",bestScore)
+    total = calculateFitness()
+    if savedships:
+        print("Average Fitness:",total/len(savedships))
+    else:
+        print("Average Fitness:",total)
+    print()
+
+    ships.append(pickOne(savedships))
+
+    #drawText("Score: "+str(displayship.score), GREEN, 20, 20, 24, False)
+
+    #generation_surface = myfont.render('Generation: ' + str(generation), False, (255, 0, 0))
+    #fitness_surface = myfont.render('Fitness: ' + str(bestScore), False, (255, 0, 0))
+    #num_surface = myfont.render('Ships: ' + str(len(ships)), False, (255, 0, 0))
+    #score_surface = myfont.render("Score:" + str(score), False, (255, 0, 0))
+    #hscore_surface = myfont.render("High Score:" + str(highScore), False, (255, 0, 0))
+
+    #screen.blit(generation_surface, (400, 0))
+    #screen.blit(fitness_surface, (400, 30))
+    #screen.blit(num_surface, (400, 60))
+    #screen.blit(score_surface, (400, 90))
+    #screen.blit(hscore_surface, (400, 120))
