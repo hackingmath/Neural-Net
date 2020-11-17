@@ -1,62 +1,56 @@
-# Project Title
+# AI for Asteroids
 
-Simple overview of use/purpose.
+This is the code to a Live Project for Manning Publications, a tutorial on how to create a working clone of the Asteroids video game and to code an AI to play it.
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+The code is in Python, using Pygame as the graphics library and numpy for the matrix calculations in the Neural Network. The polar_cartesian file is helper code from Paul Orland's Math for Programmers, the book this Live Project is officially based on.
 
 ## Getting Started
 
 ### Dependencies
 
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
+* Intall Python 3
+* Install Pycharm - highly recommended because it automatically creates a virtual environment for all the dependencies you install for your project.
+* Install Pygame and Numpy.
 
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
+* Put the files from the "November2020" directory in a Pycharm project.
 
 ### Executing program
 
-* How to run the program
-* Step-by-step bullets
+* Put all the files into a project, on Pycharm for example.
+
+* To play manually, run ship_ai_PF.py with these settings
 ```
-code blocks for commands
+GRAPHICS_ON = True
+AI_PLAYING = False
 ```
+* To have the AI play, and to watch the game, run ga.py with these settings at the beginning of ship_ai_PF:
+```
+GRAPHICS_ON = True
+AI_PLAYING = True
+```
+
+* To have the AI play, and to disable the graphics, run ga.py with these settings at the beginning of ship_ai_PF:
+```
+GRAPHICS_ON = False
+AI_PLAYING = True
+```
+
+* The plan is to have the program play hundreds of ships at a time or one after the other very quickly, but as of November 17 it runs rather slowly. Any constructive input is welcome!
 
 ## Help
 
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
+I'm asking for *your* help to test and debug this code! Let me know if you have improvements. peter@techymath.com
 
 ## Authors
 
-Contributors names and contact info
+Peter Farrell aka Techy Math  
+[@hackingmath](https://twitter.com/hackingmath)
 
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
-
-## Version History
-
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
-
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
 
 ## Acknowledgments
 
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
+Last year I was inspired by Dan Shiffman to make an AI play Flappy Bird like he did, and the YouTuber CodeBullet inspired me to tackle Asteroids. The only difference is their programs worked! The Neural Network is closely based on the DIY net in the excellent book Make Your Own Neural Network by Tariq Rashid.
