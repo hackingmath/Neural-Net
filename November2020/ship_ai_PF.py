@@ -18,7 +18,10 @@ VIOLET = (148, 0, 211)
 
 width,height = 600,600
 asteroid_count = 10
-GRAPHICS_ON = False
+
+#These are the values to change when playing manually
+#or not wanting to see the graphics
+GRAPHICS_ON = True
 AI_PLAYING = True
 
 # Create function to draw texts
@@ -65,6 +68,7 @@ class Ship():
 
     def update(self,asteroids,asteroid_count):
         self.life += 1
+        #check if being hit by asteroid
         for a in asteroids:
             if pc.distance(self,a) < a.size:
                 self.alive = False
@@ -106,15 +110,19 @@ class Ship():
         # print(self.dpoints)
 
         #my method:
-        for i in range(8):
-            dist = 0
+        for i in range(8): #8 directions
+            dist = 0    #start at 0
+            #determine angle of this line
             ang = self.rotation_angle + 2*pi*i/8
             c,s = cos(ang),sin(ang)
+            #add a small distance and check if that position
+            #intersects any asteroids
             while dist < 500:
                 dist += 1
                 x,y = self.x + dist*c, self.y + dist*s
                 intersect = self.check_asteroids(x,y,asteroids)
                 if intersect:
+                    #dpoints are the distance to the intersection
                     self.dpoints[i] = intersect
                     #print("intersect")
                     break
@@ -145,7 +153,9 @@ class Ship():
         self.shoot_bullet = True
 
     def think(self,bulletList):
-        #
+        """Send distances in all 8 directions to
+        the Neural Net and from the output, turn
+        or shoot."""
         self.inputs = numpy.zeros(8)
 
         for j,pt in enumerate(self.dpoints):
@@ -170,7 +180,6 @@ class Ship():
         if GRAPHICS_ON:
             # set up display
             pygame.init()
-
             screen = pygame.display.set_mode([width, height])
 
             #in case you use fonts:
@@ -274,7 +283,7 @@ class Ship():
             if GRAPHICS_ON:
                 clock.tick(FPS)
                 pygame.display.update()
-                pygame.quit()
+                #pygame.quit()
         return self.score + self.life
 
 s = Ship(50,600,600,graphics=True)
