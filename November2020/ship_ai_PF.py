@@ -277,5 +277,5 @@ class Ship():
                 pygame.quit()
         return self.score + self.life
 
-s = Ship(50,600,600,True)
+s = Ship(50,600,600,graphics=True)
 s.play()
