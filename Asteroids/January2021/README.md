@@ -27,7 +27,7 @@ The code is in Python, using Pygame as the graphics library and numpy for the ma
 GRAPHICS_ON = True
 AI_PLAYING = False
 ```
-* To have the AI play, and to watch the game, run ga_m5.py with these settings at the beginning of ship_ai_PF:
+* To have the AI play, and to watch the game, run ga_m5.py with these settings at the beginning of ship_ai_m5:
 ```
 GRAPHICS_ON = True
 AI_PLAYING = True
