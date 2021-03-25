@@ -164,7 +164,10 @@ class Asteroid():
                     increase_score += 50
                 elif self.level == 3:
                     increase_score += 100
-                asteroids.remove(self)
+                try:
+                    asteroids.remove(self)
+                except ValueError:
+                    pass
                 bullets.remove(b)
                 self.level += 1
                 if self.level in [2,3]:
@@ -215,7 +218,8 @@ class Game(object):
         self.score = 0
         self.bullets = []
         self.create_bullet = True
-        self.asteroids = [Asteroid() for _ in range(asteroid_count)]
+        self.asteroid_count = 10
+        self.asteroids = [Asteroid() for _ in range(self.asteroid_count)]
 
     def reset(self):
         self.__init__()
@@ -262,8 +266,8 @@ class Game(object):
 
         if len(self.asteroids) == 0:
             #time.sleep(1)
-            asteroid_count += 2
-            self.asteroids = [Asteroid() for i in range(asteroid_count)]
+            self.asteroid_count += 2
+            self.asteroids = [Asteroid() for i in range(self.asteroid_count)]
 
         for a in self.asteroids:
             a.move()

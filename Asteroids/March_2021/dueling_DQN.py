@@ -4,7 +4,8 @@ Feb 28, 2021"""
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from game_no_graphics import Game #from game import Game
+from game import Game
+#from game_no_graphics import Game
 import random
 import math
 import time
@@ -27,7 +28,7 @@ random.seed(seed_value)
 
 #####PARAMS#######
 learning_rate = 0.001
-NUM_EPISODES = 500
+NUM_EPISODES = 5000
 gamma = 0.9999
 replay_memory_size = 50000
 batch_size = 32
@@ -160,30 +161,35 @@ qnet_agent = QNet_Agent()
 report_interval = 10
 steps_total = []
 frames_total = 0
+high_score = 0
 scores = []
 num_scores = 0
 solved_after = 0
 solved = False
 start_time = time.time()
 
-for i_episode in range(1,501):
+for i_episode in range(1,2001):
     state = env.reset()
     step = 0
     while True:
         step += 1
         frames_total += 1
-        epsilon = calculate_epsilon(frames_total)
+        epsilon = calculate_epsilon(step)
         action = qnet_agent.select_action(state,epsilon)
         #print("action:",action)
         new_state,reward,done, score=env.play_frame(action)
         #print(new_state,reward,done,score)
-        scores.append(score)
-        num_scores += 1
+        if score > high_score:
+            high_score = score
+
+        #scores.append(score)
+        #num_scores += 1
         memory.push(state,action,new_state,reward,done)
         #print(f"frame{frames_total}")
         qnet_agent.optimize()
         state = new_state
         if done:
+            scores.append(score)
             steps_total.append(step)
             mean_reward_100 = sum(scores[-100:])/100
             if mean_reward_100 > score_to_solve and not solved:
@@ -194,7 +200,7 @@ for i_episode in range(1,501):
             if i_episode % report_interval == 0:
                 print("\n***Episode %i *** \
 \                      \nAv.scores: [last %i]: %.2f,[last 100]: %.2f, [all]: %.2f \
-                        \nepsilon: %.2f, frames_total: %i, last score: %i"
+                        \nepsilon: %.2f, frames_total: %i, last score: %i, high score: %i"
                       %
                       (i_episode,
                        report_interval,
@@ -203,7 +209,7 @@ for i_episode in range(1,501):
                        sum(scores)/len(scores),
                        epsilon,
                        frames_total,
-                       score)
+                       score,high_score)
                       )
                 elapsed_time = time.time() - start_time
                 print("Elapsed time:",time.strftime("%H:%M:%S",time.gmtime(elapsed_time)))
@@ -215,12 +221,17 @@ print("Average Steps (last 100 episodes): {0}".format(sum(steps_total[-100:])/10
 if solved:
     print(f"Solved after {solved_after} episodes")
 plt.figure(figsize=(12,5))
-plt.title("Rewards")
-plt.bar(torch.arange(len(steps_total)),steps_total,alpha=0.6,color='green', width=5)
+plt.title("Scores")
+plt.bar(torch.arange(i_episode),scores,alpha=0.6,color='green', width=5)
 plt.show()
 
 
 """
+March 24:
+***Episode 380 *** \                      
+Av.scores: [last 10]: 5136.00,[last 100]: 5103.60, [all]: 2972.48                         
+epsilon: 0.01, frames_total: 320998, last score: 5240, high score: 11520
+Elapsed time: 01:43:23
 
 
 """

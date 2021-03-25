@@ -176,7 +176,10 @@ class Asteroid():
                     increase_score += 50
                 elif self.level == 3:
                     increase_score += 100
-                asteroids.remove(self)
+                try:
+                    asteroids.remove(self)
+                except ValueError:
+                    pass
                 bullets.remove(b)
                 self.level += 1
                 if self.level in [2,3]:
@@ -203,14 +206,14 @@ class Bullet():
         self.x += self.speed * cos(self.heading)
         self.y += self.speed * sin(self.heading)
         # wrap around screen
-        if self.x > width:
-            self.x = 0
-        elif self.x < 0:
-            self.x = width
-        elif self.y > height:
-            self.y = 0
-        elif self.y < 0:
-            self.y = height
+        # if self.x > width:
+        #     self.x = 0
+        # elif self.x < 0:
+        #     self.x = width
+        # elif self.y > height:
+        #     self.y = 0
+        # elif self.y < 0:
+        #     self.y = height
         self.life -= 1
         pygame.draw.circle(screen, GREEN, (int(self.x), int(self.y)), 3)
 
@@ -335,5 +338,15 @@ Elapsed time: 01:10:27
 Av.steps: [last 10]: 157.30,[last 100]: 233.30, [all]: 321.20                         
 epsilon: 0.01, frames_total: 151286, score: 890
 Elapsed time: 01:11:23
+
+***Episode 100 *** \                      
+Av.scores: [last 10]: 1660.00,[last 100]: 1263.60, [all]: 2228.59                         
+epsilon: 0.01, frames_total: 64094, last score: 1660, high score: 7560
+Elapsed time: 00:25:26
+
+***Episode 300 *** \                      
+Av.scores: [last 10]: 2584.00,[last 100]: 2614.60, [all]: 2915.84                         
+epsilon: 0.01, frames_total: 158028, last score: 20, high score: 9830
+Elapsed time: 01:04:23
 
 """
