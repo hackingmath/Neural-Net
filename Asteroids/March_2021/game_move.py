@@ -1,5 +1,5 @@
-#import pygame
-from math import sin,cos,sqrt,pi,atan2
+import pygame
+from math import sin,cos,sqrt,pi,atan2,degrees
 from random import randint, uniform
 import time
 import numpy as np
@@ -15,9 +15,13 @@ RED =   (255,   0,   0)
 width, height = 600, 600
 counter = 0
 frameRate = 200
-asteroid_count = 10
-#pygame.init()
-#screen = pygame.display.set_mode([width,height])
+pygame.init()
+screen = pygame.display.set_mode([width,height])
+
+def capture(display,name,pos,size): # (pygame Surface, String, tuple, tuple)
+    image = pygame.Surface(size)  # Create image surface
+    image.blit(display,(0,0),(pos,size))  # Blit portion of the display to the image
+    pygame.image.save(image,name)  # Save the image to the disk
 
 def to_polar(vector):
     x, y = vector[0], vector[1]
@@ -33,7 +37,7 @@ def distance(obj1,obj2):
     return sqrt((obj1.x-obj2.x)**2+(obj1.y-obj2.y)**2)
 
 def drawText(msg, color, x, y, s, center=True):
-    #screen_text = pygame.font.SysFont("Calibri", s).render(msg, True, color)
+    screen_text = pygame.font.SysFont("Calibri", s).render(msg, True, color)
     if center:
         rect = screen_text.get_rect()
         rect.center = (int(x), int(y))
@@ -41,6 +45,13 @@ def drawText(msg, color, x, y, s, center=True):
         rect = (int(x), int(y))
     screen.blit(screen_text, rect)
 
+def drawShips(lives,size):
+    """For lives, under Score"""
+    size *= 0.5
+    vertices = [(0,-1*size), (-0.25*size, -0.25*size), (0.25*size, -0.25*size)]
+    for i in range(lives):
+        screen_vertices = [(40+i*0.65*size+v[0],70+v[1]) for v in vertices]
+        pygame.draw.lines(screen, GREEN, True, screen_vertices, 2)
 
 
 class Ship(object):
@@ -48,7 +59,8 @@ class Ship(object):
         self.size = size
         self.rotation_angle = 0
         self.x,self.y = width/2,height/2
-        self.velocity = 0
+        self.velocity = [0,0]
+        self.maxspeed = 1
         vertices = [(0.5,0),(-0.25,-0.25),(-0.25,0.25)]
         self.points = [to_polar(v) for v in vertices]
         self.points = [[self.size*r,theta] for [r,theta] in self.points]
@@ -90,8 +102,9 @@ class Ship(object):
                     break
 
     def update(self,asteroids):
-        #self.x = self.x + self.velocity*cos(self.rotation_angle)
-        #self.y = self.y + self.velocity*sin(self.rotation_angle)
+        self.rotation_angle %= 2*pi
+        self.x = self.x + self.velocity[0]#*cos(self.rotation_angle)
+        self.y = self.y + self.velocity[1]#*sin(self.rotation_angle)
 
         if self.x < 0: self.x = width
         if self.x > width: self.x = 0
@@ -100,7 +113,7 @@ class Ship(object):
             self.y = 0
 
         for a in asteroids:
-            if distance(self,a) < a.size:
+            if distance(self,a) < 1.25*a.size:
                 #self.lives -= 1
                 self.alive = False#done = True
 
@@ -114,16 +127,20 @@ class Ship(object):
         self.screen_points = [[self.x + pt[0], self.y + pt[1]] for pt in \
                               self.screen_points]
 
-        # pygame.draw.lines(screen, self.color, True, self.screen_points, 2)
-        # for i, pt in enumerate(self.distances):
-        #     pygame.draw.line(screen, BLUE, (int(self.x + pt * cos(self.rotation_angle + i * pi / 4)),
-        #                                     int(self.y + pt * sin(self.rotation_angle + i * pi / 4))),
-        #                                     (int(self.x), int(self.y)), 2)
+        pygame.draw.lines(screen, self.color, True, self.screen_points, 2)
+        for i, pt in enumerate(self.distances):
+            #print("Pt:",pt)
+            pygame.draw.line(screen, BLUE, (int(self.x + pt * 300*cos(self.rotation_angle + i * pi / 4)),
+                                            int(self.y + pt * 300*sin(self.rotation_angle + i * pi / 4))),
+                                            (int(self.x), int(self.y)), 2)
+        pygame.draw.line(screen, RED, (int(self.x + 300 * cos(self.rotation_angle)),
+                                        int(self.y + 300 * sin(self.rotation_angle))),
+                                        (int(self.x), int(self.y)), 2)
 
 class Asteroid():
     def __init__(self,size = 50):
         self.x,self.y = randint(0,width),randint(0,height)
-        # Asteroids can't start out too close to ship
+        #Asteroids can't start out too close to ship
         while (200 < self.x < 400) or (200 < self.y < 400):
             self.x, self.y = randint(0, width), randint(0, height)
         self.size = size
@@ -181,8 +198,8 @@ class Asteroid():
                         asteroids.append(new_a)
         return increase_score
 
-    # def draw(self):
-    #     pygame.draw.lines(screen, GREEN, True, self.screen_points, 2)
+    def draw(self):
+        pygame.draw.lines(screen, GREEN, True, self.screen_points, 2)
 
 class Bullet():
     def __init__(self, x, y, heading):
@@ -206,10 +223,10 @@ class Bullet():
         elif self.y < 0:
             self.y = height
         self.life -= 1
-        #pygame.draw.circle(screen, GREEN, (int(self.x), int(self.y)), 3)
+        pygame.draw.circle(screen, GREEN, (int(self.x), int(self.y)), 3)
 
-# pygame.display.set_caption("Pygame Template")
-# clock = pygame.time.Clock()
+pygame.display.set_caption("Pygame Template")
+clock = pygame.time.Clock()
 
 class Game(object):
     global asteroids,bullets
@@ -221,7 +238,7 @@ class Game(object):
         self.score = 0
         self.bullets = []
         self.create_bullet = True
-        self.asteroid_count = 10
+        self.asteroid_count = 4
         self.asteroids = [Asteroid() for _ in range(self.asteroid_count)]
 
     def reset(self):
@@ -229,15 +246,15 @@ class Game(object):
         return self.ship.distances
 
     def play_frame(self,action):
-        global asteroid_count,counter
+        global counter
         self.done = False
 
         counter += 1
         #while not done:
         #Update the game state with action from NN
-        # for event in pygame.event.get():
-        #     if event.type == pygame.QUIT:  # if pygame window is closed by user
-        #         self.done = True
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:  # if pygame window is closed by user
+                self.done = True
         if action == 0:
             self.ship.rotation_angle -= 0.05
         if action == 1:
@@ -248,17 +265,27 @@ class Game(object):
                                            self.ship.rotation_angle))
                 self.createBullet = False
                 bullet_wait = time.time()
-        # if action == 3:
-        #     self.ship.velocity = (self.ship.velocity + 1) % 20
+        if action == 3:
+            self.ship.velocity[0] += cos(self.ship.rotation_angle)
+            if self.ship.velocity[0] > self.ship.maxspeed:
+                self.ship.velocity[0] = self.ship.maxspeed
+            if self.ship.velocity[0] < -self.ship.maxspeed:
+                self.ship.velocity[0] = -self.ship.maxspeed
+
+            self.ship.velocity[1] += sin(self.ship.rotation_angle)
+            if self.ship.velocity[1] > self.ship.maxspeed:
+                self.ship.velocity[1] = self.ship.maxspeed
+            if self.ship.velocity[1] < -self.ship.maxspeed:
+                self.ship.velocity[1] = -self.ship.maxspeed
 
         #Draw the scene
-        #screen.fill(BLACK)
+        screen.fill(BLACK)
         self.ship.reward = 0
         self.ship.measure(self.asteroids)
         self.ship.update(self.asteroids)
         state = np.array(self.ship.distances,dtype=np.float32)
 
-        #self.ship.draw()
+        self.ship.draw()
         if not self.ship.alive:
             self.ship.reward = -10
             # drawText("GAME OVER", RED, width / 2, 200, 36, True)
@@ -268,14 +295,14 @@ class Game(object):
             self.done = True
 
         if len(self.asteroids) == 0:
-            #time.sleep(1)
+            time.sleep(1)
             self.asteroid_count += 2
             self.asteroids = [Asteroid() for i in range(self.asteroid_count)]
 
         for a in self.asteroids:
             a.move()
             self.score += a.check_bullets(self.asteroids,self.ship,self.bullets)
-            #a.draw()
+            a.draw()
 
         if self.create_bullet == False and time.time() - bullet_wait >= 0.3:
             self.create_bullet = True
@@ -287,11 +314,11 @@ class Game(object):
                 except:
                     pass
         # Draw score
-        #drawText("Score: " + str(self.score), GREEN, 20, 20, 24, False)
+        drawText("Score: " + str(self.score), GREEN, 20, 20, 24, False)
         # Draw ships for lives
         #drawShips(ship.lives, ship.size)
 
-        #pygame.display.flip()
+        pygame.display.flip()
         #clock.tick(frameRate)
         # for saving screenshots
         #if counter %5 == 0:
@@ -299,3 +326,46 @@ class Game(object):
 
         return state,self.ship.reward,self.done,self.score
 
+
+    #pygame.quit()
+
+if __name__ == "__main__":
+    g = Game()
+    for i in range(100):
+        g.play_frame(2)
+        g.ship.measure(g.asteroids)
+        print("distances",g.ship.distances)
+
+"""
+March 23, 2021 After 1 hour of training with graphics:
+***Episode 440 *** \                      
+Av.steps: [last 10]: 140.70,[last 100]: 207.67, [all]: 327.27                         
+epsilon: 0.01, frames_total: 144324, score: 80
+Elapsed time: 01:07:38
+
+***Episode 450 *** \                      
+Av.steps: [last 10]: 212.00,[last 100]: 218.09, [all]: 324.71                         
+epsilon: 0.01, frames_total: 146444, score: 3600
+Elapsed time: 01:08:41
+
+***Episode 460 *** \                      
+Av.steps: [last 10]: 326.90,[last 100]: 242.20, [all]: 324.76                         
+epsilon: 0.01, frames_total: 149713, score: 280
+Elapsed time: 01:10:27
+
+***Episode 470 *** \                      
+Av.steps: [last 10]: 157.30,[last 100]: 233.30, [all]: 321.20                         
+epsilon: 0.01, frames_total: 151286, score: 890
+Elapsed time: 01:11:23
+
+***Episode 100 *** \                      
+Av.scores: [last 10]: 1660.00,[last 100]: 1263.60, [all]: 2228.59                         
+epsilon: 0.01, frames_total: 64094, last score: 1660, high score: 7560
+Elapsed time: 00:25:26
+
+***Episode 300 *** \                      
+Av.scores: [last 10]: 2584.00,[last 100]: 2614.60, [all]: 2915.84                         
+epsilon: 0.01, frames_total: 158028, last score: 20, high score: 9830
+Elapsed time: 01:04:23
+
+"""

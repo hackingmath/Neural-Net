@@ -4,7 +4,8 @@ Feb 28, 2021"""
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from game import Game
+from game_move import Game
+#from game import Game
 #from game_no_graphics import Game
 import random
 import math
@@ -27,27 +28,27 @@ torch.manual_seed(seed_value)
 random.seed(seed_value)
 
 #####PARAMS#######
-learning_rate = 0.001
-NUM_EPISODES = 5000
+learning_rate = 0.03
+NUM_EPISODES = 200
 gamma = 0.9999
 replay_memory_size = 50000
 batch_size = 32
 
-update_target_frequency = 500
+update_target_frequency = 50
 double_dqn = True
 
 hidden_layer1 = 64
 #hidden_layer2 = 32
 egreedy = 0.9
 egreedy_final = 0.01
-egreedy_decay = 500
+egreedy_decay = 200
 
-score_to_solve=195
+score_to_solve=1000
 clip_error = False
 ##################
 
 number_of_inputs = 8#env.observation_space.shape[0]
-number_of_outputs = 3#env.action_space.n
+number_of_outputs = 4#env.action_space.n
 
 def calculate_epsilon(steps_done):
     epsilon = egreedy_final + (egreedy - egreedy_final) * \
@@ -112,7 +113,7 @@ class QNet_Agent(object):
                 action = torch.max(action_from_nn,0)[1]
                 action = action.item()
         else:
-            action = random.choice([0,1,2])#env.action_space.sample()
+            action = random.choice(list(range(number_of_outputs)))#env.action_space.sample()
         return action
 
     def optimize(self):
@@ -163,12 +164,13 @@ steps_total = []
 frames_total = 0
 high_score = 0
 scores = []
+mean_100s = list()
 num_scores = 0
 solved_after = 0
 solved = False
 start_time = time.time()
 
-for i_episode in range(1,2001):
+for i_episode in range(1,NUM_EPISODES+1):
     state = env.reset()
     step = 0
     while True:
@@ -176,7 +178,7 @@ for i_episode in range(1,2001):
         frames_total += 1
         epsilon = calculate_epsilon(step)
         action = qnet_agent.select_action(state,epsilon)
-        #print("action:",action)
+        #print("epsilon:",epsilon)
         new_state,reward,done, score=env.play_frame(action)
         #print(new_state,reward,done,score)
         if score > high_score:
@@ -192,6 +194,7 @@ for i_episode in range(1,2001):
             scores.append(score)
             steps_total.append(step)
             mean_reward_100 = sum(scores[-100:])/100
+            mean_100s.append(mean_reward_100)
             if mean_reward_100 > score_to_solve and not solved:
                 print(f"SOLVED! After {i_episode} episodes.")
                 solved_after = i_episode
@@ -222,7 +225,7 @@ if solved:
     print(f"Solved after {solved_after} episodes")
 plt.figure(figsize=(12,5))
 plt.title("Scores")
-plt.bar(torch.arange(i_episode),scores,alpha=0.6,color='green', width=5)
+plt.bar(torch.arange(i_episode),mean_100s,alpha=0.6,color='green', width=5)
 plt.show()
 
 

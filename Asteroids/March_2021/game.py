@@ -15,7 +15,6 @@ RED =   (255,   0,   0)
 width, height = 600, 600
 counter = 0
 frameRate = 200
-asteroid_count = 10
 pygame.init()
 screen = pygame.display.set_mode([width,height])
 
@@ -112,7 +111,7 @@ class Ship(object):
             self.y = 0
 
         for a in asteroids:
-            if distance(self,a) < a.size:
+            if distance(self,a) < 1.25*a.size:
                 #self.lives -= 1
                 self.alive = False#done = True
 
@@ -135,6 +134,9 @@ class Ship(object):
 class Asteroid():
     def __init__(self,size = 50):
         self.x,self.y = randint(0,width),randint(0,height)
+        #Asteroids can't start out too close to ship
+        while (200 < self.x < 400) or (200 < self.y < 400):
+            self.x, self.y = randint(0, width), randint(0, height)
         self.size = size
         self.velocity = 1
         self.level = 1
@@ -230,14 +232,15 @@ class Game(object):
         self.score = 0
         self.bullets = []
         self.create_bullet = True
-        self.asteroids = [Asteroid() for _ in range(asteroid_count)]
+        self.asteroid_count = 4
+        self.asteroids = [Asteroid() for _ in range(self.asteroid_count)]
 
     def reset(self):
         self.__init__()
         return self.ship.distances
 
     def play_frame(self,action):
-        global asteroid_count,counter
+        global counter
         self.done = False
 
         counter += 1
@@ -277,8 +280,8 @@ class Game(object):
 
         if len(self.asteroids) == 0:
             time.sleep(1)
-            asteroid_count += 2
-            self.asteroids = [Asteroid() for i in range(asteroid_count)]
+            self.asteroid_count += 2
+            self.asteroids = [Asteroid() for i in range(self.asteroid_count)]
 
         for a in self.asteroids:
             a.move()
